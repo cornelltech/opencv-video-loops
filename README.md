@@ -1,12 +1,11 @@
 # opencv-video-loops
 
 Video processing and display loops developed at the [Cornell Tech
-Connected Excperiences Laboratory](http://cx.jacobs.cornell.edu/).
+Connected Experiences Laboratory](http://cx.jacobs.cornell.edu/).
 
-The routines in directory `src/` were developed in 2018 as part of
-Benedetta Piantella's project under the direction of [Professor Mor
-Naaman](https://people.jacobs.cornell.edu/mor/) and the [Social
-Technologies Laboratory](https://s.tech.cornell.edu/) at the [Cornell
-Tech Connected Excperiences
-Laboratory](http://cx.jacobs.cornell.edu/), supported by
+Code by Doron Tal (2018) for a project with 
+Benedetta Piantella and [Mor
+Naaman](https://people.jacobs.cornell.edu/mor/) at the Cornell
+Tech [Connected Experiences
+Laboratory](http://cx.jacobs.cornell.edu/). The work of the lab is generously supported by
 [OATH](https://www.oath.com/).
