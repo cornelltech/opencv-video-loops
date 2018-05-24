@@ -12,5 +12,5 @@ Laboratory](http://cx.jacobs.cornell.edu/). The work of the lab is generously su
 
 ## Introduction
 
-The code in this repository provides a python (v3) framework for using OpenCV with streaming video. It includes an abstract base class that runs the video grabbing and OpenCV processing in separate threads, and several examples of video processing that use that class.
+The code in this repository provides a Python code framework for using OpenCV with streaming video. It includes an abstract base class that runs the video grabbing and OpenCV processing in separate threads, and several examples of video processing that use that class.
 
