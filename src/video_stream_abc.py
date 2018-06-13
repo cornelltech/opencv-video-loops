@@ -35,7 +35,7 @@ class VideoStreamABC():
     def stop(self):
         """Stop capturing & processing frames"""
         self.looping = False
-        self.stream.release()
+        # self.stream.release()
         cv2.destroyAllWindows()
 
     def grab_thread_loop(self):
