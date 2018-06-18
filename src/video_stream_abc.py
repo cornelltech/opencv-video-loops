@@ -3,12 +3,26 @@
 
 import sys
 import abc
-from threading import Lock, Thread
+from threading import Lock, Thread, Event
 import cv2
 from fps import FPS
 from pacer import Pacer
-from video_stream_common import get_stream
 
+
+IMSHOW_WINDOW_NAME = 'cam'
+
+class StoppableThread(Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+    def __init__(self, *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop_event = Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def is_stopped(self):
+        return self._stop_event.isSet()
 
 class VideoStreamABC():
     """Abstract base class for multithreaded OpenCV video streaming"""
@@ -18,35 +32,27 @@ class VideoStreamABC():
         """Constructor"""
         self.stream = stream
         self.desired_fps = desired_fps
-        self.grab_thread = Thread(target=self.grab_thread_loop)
-        self.proc_thread = Thread(target=self.proc_thread_loop)
         self.frame_lock = Lock()
         self.frame = None
-        self.looping = False
+        self.grab_thread = StoppableThread(target=self.grab_thread_loop)
+        self.proc_thread = StoppableThread(target=self.proc_thread_loop)
 
     def start(self):
         """Start capturing & processing frames"""
-        if self.is_running():
-            raise Exception('Cannot start, already running')
-        self.looping = True
         self.grab_thread.start()
         self.proc_thread.start()
 
-    def stop(self):
-        """Stop capturing & processing frames"""
-        self.looping = False
-        # self.stream.release()
-        cv2.destroyAllWindows()
-
     def grab_thread_loop(self):
         """Main loop of thread that continuously grabs video frames"""
+        print('grab_thread_loop()')
         fps = FPS()
         fps.start()
-        while self.looping:
+        while not self.grab_thread.is_stopped():
             (got_it, frame) = self.stream.read()
             if not got_it:
-                print('Video stream stopped')
-                break
+                print('Video stream stopped, stopping grab')
+                self.grab_thread.stop()
+
             self.frame_lock.acquire()
             self.frame = frame
             self.frame_lock.release()
@@ -57,36 +63,33 @@ class VideoStreamABC():
         print('[GRAB] n_frames: %i' % fps.n_frames)
 
     def proc_thread_loop(self):
-        """Main loop of thread that processes grabbed video frames"""
+        """Main loop of thread that processes & displays grabbed video frames"""
+        print('proc_thread_loop()')
         if self.desired_fps:
             pacer = Pacer(self.desired_fps)
             pacer.start()
         fps = FPS()
         fps.start()
-        while self.looping:
-
+        while not self.grab_thread.is_stopped():
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
 
             if frame is not None:
-                cv2.imshow('cam', self.process_frame(frame))
+                cv2.imshow(IMSHOW_WINDOW_NAME, self.process_frame(frame))
                 if cv2.waitKey(1) == 27:
-                    self.stop()
+                    self.grab_thread.stop()
+                    self.proc_thread.stop()
+                    fps.stop()
+                    print('[PROC] elasped time: {:.2f}'.format(fps.elapsed()))
+                    print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
+                    print('[PROC] n_frames: %i' % fps.n_frames)
+                    cv2.destroyAllWindows()
+
                 fps.update()
 
             if self.desired_fps:
                 pacer.update()
-
-        fps.stop()
-
-        print('[PROC] elasped time: {:.2f}'.format(fps.elapsed()))
-        print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
-        print('[PROC] n_frames: %i' % fps.n_frames)
-
-    def is_running(self):
-        """Returns whether both threads are still alive"""
-        return self.grab_thread.isAlive() or self.proc_thread.isAlive()
 
     @abc.abstractmethod
     def process_frame(self, frame):
@@ -121,4 +124,4 @@ if __name__ == '__main__':
     # you can supply whatever stream you want to the constructor, as long as
     # it has the read() function implemented, to get the next frame, and that
     # this function returns two values, as in: (got_it, frame) = stream.read()
-    VisualizeOnly(get_stream(sys.argv[1])).start()
+    VisualizeOnly(cv2.VideoCapture(sys.argv[1])).start()
