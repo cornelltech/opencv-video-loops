@@ -44,7 +44,6 @@ class VideoStreamABC():
 
     def grab_thread_loop(self):
         """Main loop of thread that continuously grabs video frames"""
-        print('grab_thread_loop()')
         fps = FPS()
         fps.start()
         while not self.grab_thread.is_stopped():
