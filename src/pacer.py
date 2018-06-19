@@ -14,20 +14,20 @@ class Pacer(object):
     def __init__(self, desiredFPS):
         """constructor"""
         self.start_time = None
-        self.last_update_time = None
+        self.prev_update_time = None
         self.desired_period = 1.0/desiredFPS
         self.update_error = 0
 
     def start(self):
         """call once, before the loop starts"""
         self.start_time = time.time()
-        self.last_update_time = self.start_time
+        self.prev_update_time = self.start_time
         return self
 
     def update(self):
         """called on each loop iteration, blocks till time is due"""
         now = time.time()
-        elapsed = now-self.last_update_time
+        elapsed = now-self.prev_update_time
         delta_time = self.desired_period-elapsed+self.update_error
 
         if delta_time > 0:
@@ -38,7 +38,7 @@ class Pacer(object):
             # too slow, fix the update_error so that next time we sleep less
             self.update_error = 0
 
-        self.last_update_time = now
+        self.prev_update_time = now
 
 class ModuleTests(unittest.TestCase):
     """module tests"""

@@ -11,17 +11,17 @@ class AbsDiff(Gray):
 
     def __init__(self, stream):
         """constructor"""
-        self.last_frame = None
+        self.prev_frame = None
         super().__init__(stream)
 
     def process_frame(self, frame):
         """returns diff"""
         gray = super().process_frame(frame)
-        if self.last_frame is None:
+        if self.prev_frame is None:
             result = gray
         else:
-            result = cv2.absdiff(gray, self.last_frame)
-        self.last_frame = gray
+            result = cv2.absdiff(gray, self.prev_frame)
+        self.prev_frame = gray
         return result
 
 
