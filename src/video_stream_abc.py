@@ -49,9 +49,8 @@ class VideoStreamABC():
         while not self.grab_thread.is_stopped():
             (got_it, frame) = self.stream.read()
             if not got_it:
-                print('Video stream stopped, stopping grab')
+                print('Video stream stopped, ending video grabbing.')
                 self.grab_thread.stop()
-
             self.frame_lock.acquire()
             self.frame = frame
             self.frame_lock.release()
@@ -63,7 +62,6 @@ class VideoStreamABC():
 
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
-        print('proc_thread_loop()')
         if self.desired_fps:
             pacer = Pacer(self.desired_fps)
             pacer.start()
@@ -73,7 +71,6 @@ class VideoStreamABC():
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
-
             if frame is not None:
                 cv2.imshow(IMSHOW_WINDOW_NAME, self.process_frame(frame))
                 if cv2.waitKey(1) == 27:
@@ -84,9 +81,7 @@ class VideoStreamABC():
                     print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
                     print('[PROC] n_frames: %i' % fps.n_frames)
                     cv2.destroyAllWindows()
-
                 fps.update()
-
             if self.desired_fps:
                 pacer.update()
 

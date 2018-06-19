@@ -6,7 +6,6 @@ import numpy
 import cv2
 from log_dog import LogDog
 from video_stream_abc import VideoStreamABC
-from video_stream_common import get_stream
 
 
 class LogDogColor(VideoStreamABC):
@@ -28,4 +27,4 @@ class LogDogColor(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    LogDogColor(get_stream(sys.argv[1])).start()
+    LogDogColor(cv2.VideoCapture(sys.argv[1])).start()

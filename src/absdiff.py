@@ -4,7 +4,6 @@
 import sys
 import cv2
 from gray import Gray
-from video_stream_common import get_stream
 
 
 class AbsDiff(Gray):
@@ -27,4 +26,4 @@ class AbsDiff(Gray):
 
 
 if __name__ == '__main__':
-    AbsDiff(get_stream(sys.argv[1])).start()
+    AbsDiff(cv2.VideoCapture(sys.argv[1])).start()

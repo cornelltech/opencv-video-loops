@@ -4,7 +4,6 @@
 import sys
 import cv2
 from gray import Gray
-from video_stream_common import get_stream
 
 
 class KNN(Gray):
@@ -22,4 +21,4 @@ class KNN(Gray):
 
 
 if __name__ == '__main__':
-    KNN(get_stream(sys.argv[1])).start()
+    KNN(cv2.VideoCapture(sys.argv[1])).start()

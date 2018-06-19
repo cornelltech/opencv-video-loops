@@ -5,7 +5,6 @@ import sys
 import numpy
 import cv2
 from video_stream_abc import VideoStreamABC
-from video_stream_common import get_stream
 
 
 class Gray(VideoStreamABC):
@@ -18,4 +17,4 @@ class Gray(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    Gray(get_stream(sys.argv[1])).start()
+    Gray(cv2.VideoCapture(sys.argv[1])).start()

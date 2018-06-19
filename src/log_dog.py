@@ -4,7 +4,6 @@
 import sys
 import cv2
 from log import Log
-from video_stream_common import get_stream
 
 
 ON_SIZE = 3
@@ -22,4 +21,4 @@ class LogDog(Log):
 
 
 if __name__ == '__main__':
-    LogDog(get_stream(sys.argv[1])).start()
+    LogDog(cv2.VideoCapture(sys.argv[1])).start()

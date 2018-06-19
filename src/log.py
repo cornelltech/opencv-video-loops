@@ -5,7 +5,6 @@ import sys
 import numpy
 import cv2
 from gray import Gray
-from video_stream_common import get_stream
 
 
 # This is an example of composing two process_frame functions
@@ -30,4 +29,4 @@ class Log(Gray):
 
 
 if __name__ == '__main__':
-    Log(get_stream(sys.argv[1])).start()
+    Log(cv2.VideoCapture(sys.argv[1])).start()

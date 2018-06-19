@@ -2,10 +2,10 @@
 """log_dog_mog2.py"""
 
 import sys
+import cv2
 import log_dog
 import mog2
 from video_stream_abc import VideoStreamABC
-from video_stream_common import get_stream
 
 
 LOG_DOG_SCALE_FACTOR = 50
@@ -25,4 +25,4 @@ class LogDogMog2(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    LogDogMog2(get_stream(sys.argv[1])).start()
+    LogDogMog2(cv2.VideoCapture(sys.argv[1])).start()

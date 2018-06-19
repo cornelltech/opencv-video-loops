@@ -5,7 +5,6 @@ import sys
 import numpy
 import cv2
 from video_stream_abc import VideoStreamABC
-from video_stream_common import get_stream
 
 
 class AvgNFrames(VideoStreamABC):
@@ -32,4 +31,4 @@ class AvgNFrames(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    AvgNFrames(get_stream(sys.argv[1])).start()
+    AvgNFrames(cv2.VideoCapture(sys.argv[1])).start()

@@ -4,7 +4,6 @@
 import sys
 import cv2
 from gray import Gray
-from video_stream_common import get_stream
 
 
 class Mog2(Gray):
@@ -22,4 +21,4 @@ class Mog2(Gray):
 
 
 if __name__ == '__main__':
-    Mog2(get_stream(sys.argv[1])).start()
+    Mog2(cv2.VideoCapture(sys.argv[1])).start()

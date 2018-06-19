@@ -2,9 +2,9 @@
 """log_dog_absdiff.py"""
 
 import sys
+import cv2
 from log_dog import LogDog
 import absdiff
-from video_stream_common import get_stream
 
 
 class LogDogAbsDiff(LogDog):
@@ -21,4 +21,4 @@ class LogDogAbsDiff(LogDog):
 
 
 if __name__ == '__main__':
-    LogDogAbsDiff(get_stream(sys.argv[1])).start()
+    LogDogAbsDiff(cv2.VideoCapture(sys.argv[1])).start()
