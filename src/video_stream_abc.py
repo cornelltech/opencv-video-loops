@@ -19,9 +19,11 @@ class StoppableThread(Thread):
         self._stop_event = Event()
 
     def stop(self):
+        """Gracefully stop the threads"""
         self._stop_event.set()
 
     def is_stopped(self):
+        """Returns true only if we've been started and then stopped"""
         return self._stop_event.isSet()
 
 class VideoStreamABC():
