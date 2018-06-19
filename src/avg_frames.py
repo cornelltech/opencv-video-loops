@@ -21,13 +21,14 @@ class AvgFrames(VideoStreamABC):
         self.avg_frame = None
         super().__init__(stream)
 
-    def process_frame(self, frame):
+    def process_frame(self, frame, reset=False):
         """returns avg of all frames after updating with weighted frame"""
         frame = numpy.float32(frame)
-        if self.avg_frame is None:
+        if self.avg_frame is None or reset:
             self.avg_frame = frame
         else:
-            self.frame = cv2.accumulateWeighted(frame, self.avg_frame, ALPHA)
+            self.avg_frame = cv2.accumulateWeighted(frame, self.avg_frame,
+                                                    ALPHA)
         return cv2.convertScaleAbs(self.avg_frame)
 
 
