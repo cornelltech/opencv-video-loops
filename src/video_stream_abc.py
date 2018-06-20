@@ -61,10 +61,14 @@ class VideoStreamABC():
             self.frame = frame
             self.frame_lock.release()
             fps.update()
+            if self.desired_fps:
+                pacer.update()
+
         fps.stop()
         print('[GRAB] elasped time: {:.2f}'.format(fps.elapsed()))
         print('[GRAB] approx. FPS: {:.2f}'.format(fps.fps()))
         print('[GRAB] n_frames: %i' % fps.n_frames)
+
 
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
