@@ -9,7 +9,7 @@ from fps import FPS
 from pacer import Pacer
 
 
-IMSHOW_WINDOW_NAME = 'cam'
+WINDOW_NAME = 'cam'
 
 class StoppableThread(Thread):
     """Thread class with a stop() method. The thread itself has to check
@@ -30,7 +30,7 @@ class VideoStreamABC():
     """Abstract base class for multithreaded OpenCV video streaming"""
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, stream, desired_fps=30):
+    def __init__(self, stream, full_screen=True, desired_fps=30):
         """Constructor"""
         self.stream = stream
         self.desired_fps = desired_fps
@@ -38,6 +38,10 @@ class VideoStreamABC():
         self.frame = None
         self.grab_thread = StoppableThread(target=self.grab_thread_loop)
         self.proc_thread = StoppableThread(target=self.proc_thread_loop)
+        if full_screen:
+            cv2.namedWindow(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN)
+            cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN,
+                                  cv2.WINDOW_FULLSCREEN)
 
     def start(self):
         """Start capturing & processing frames"""
@@ -74,7 +78,7 @@ class VideoStreamABC():
             frame = self.frame
             self.frame_lock.release()
             if frame is not None:
-                cv2.imshow(IMSHOW_WINDOW_NAME, self.process_frame(frame))
+                cv2.imshow(WINDOW_NAME, self.process_frame(frame))
                 if cv2.waitKey(1) == 27:
                     self.grab_thread.stop()
                     self.proc_thread.stop()
