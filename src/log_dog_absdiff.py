@@ -10,9 +10,9 @@ import absdiff
 class LogDogAbsDiff(LogDog):
     """Log-Dog then AbsDiff"""
 
-    def __init__(self, stream):
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.absdiff = absdiff.AbsDiff(None)
-        super().__init__(stream)
 
     def process_frame(self, frame):
         """Log-Dog then AbsDiff"""
