@@ -10,12 +10,11 @@ from video_stream_abc import VideoStreamABC
 class AvgNFrames(VideoStreamABC):
     """average n frames"""
 
-    def __init__(self, stream):
-        """constructor"""
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.n_frames = 100
         self.frames = []
         self.avg_frame = None
-        super().__init__(stream)
 
     def process_frame(self, frame):
         """returns average of self.n_frames frames after updating w/frame"""

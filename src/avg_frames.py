@@ -16,10 +16,9 @@ ALPHA = 0.1
 class AvgFrames(VideoStreamABC):
     """average frames"""
 
-    def __init__(self, stream):
-        """constructor"""
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.avg_frame = None
-        super().__init__(stream)
 
     def process_frame(self, frame, reset=False):
         """returns avg of all frames after updating with weighted frame"""
