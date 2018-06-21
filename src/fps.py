@@ -6,7 +6,7 @@ import unittest
 import time
 
 
-class FPS(object):
+class FPS():
     """
     Class to measure frames per second
     """

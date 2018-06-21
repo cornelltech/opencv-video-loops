@@ -7,7 +7,7 @@ import unittest
 from fps import FPS
 
 
-class Pacer(object):
+class Pacer():
     """
     Class to enforce a specific FPS by sleeping, if necessary, between frames
     """
