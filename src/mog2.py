@@ -9,10 +9,9 @@ from gray import Gray
 class Mog2(Gray):
     """Mog2 background subtraction"""
 
-    def __init__(self, stream):
-        """constructor"""
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.fgbg = cv2.createBackgroundSubtractorMOG2()
-        super().__init__(stream)
 
     def process_frame(self, frame):
         """Mog2 background subtraction"""
