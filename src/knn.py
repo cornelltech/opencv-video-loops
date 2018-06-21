@@ -9,10 +9,9 @@ from gray import Gray
 class KNN(Gray):
     """KNN background subtraction"""
 
-    def __init__(self, stream):
-        """constructor"""
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.fgbg = cv2.createBackgroundSubtractorKNN(10, 500.0, False)
-        super().__init__(stream)
 
     def process_frame(self, frame):
         """KNN background subtraction"""
