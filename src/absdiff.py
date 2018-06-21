@@ -10,7 +10,6 @@ class AbsDiff(Gray):
     """absolute value of (current_frame - previous_frame)"""
 
     def __init__(self, stream, *args, **kwargs):
-        """constructor"""
         super().__init__(stream, *args, **kwargs)
         self.prev_frame = None
 

@@ -9,6 +9,9 @@ from video_stream_abc import VideoStreamABC
 
 class Gray(VideoStreamABC):
     """gray each frame"""
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
+
     def process_frame(self, frame):
         """gray frame"""
         if numpy.size(frame[0, 0]) == 3:
