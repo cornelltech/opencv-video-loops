@@ -13,10 +13,10 @@ LOG_DOG_SCALE_FACTOR = 50
 class LogDogMog2(VideoStreamABC):
     """Log-Dog then Mog2"""
 
-    def __init__(self, stream):
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.log_dog = log_dog.LogDog(None)
         self.mog2 = mog2.Mog2(None)
-        super().__init__(stream)
 
     def process_frame(self, frame):
         """Log-Dog then Mog2"""
