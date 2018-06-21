@@ -11,10 +11,9 @@ from video_stream_abc import VideoStreamABC
 class LogDogColor(VideoStreamABC):
     """log-dog a frame, show in color"""
 
-    def __init__(self, stream):
-        """constructor"""
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(stream, *args, **kwargs)
         self.log_dog = LogDog(None)
-        super().__init__(stream)
 
     def process_frame(self, frame):
         """log-dog a frame"""
