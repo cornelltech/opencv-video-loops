@@ -13,10 +13,13 @@ WINDOW_NAME = 'cam'
 
 class StoppableThread(Thread):
     """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    regularly for the is_stopped() condition."""
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # self.stop_event: set it to stop the thread
         self._stop_event = Event()
+        self.fps = FPS()
+        self.is_started = False
 
     def stop(self):
         """Gracefully stop the threads"""
@@ -55,7 +58,8 @@ class VideoStreamABC():
 
     def grab_thread_loop(self):
         """Main loop of thread that continuously grabs video frames"""
-        fps = FPS()
+        # fps = FPS()
+        fps = self.grab_thread.fps
         fps.start()
         while not self.grab_thread.is_stopped():
             (got_it, frame) = self.stream.read()
@@ -75,7 +79,8 @@ class VideoStreamABC():
 
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
-        fps = FPS()
+        # fps = FPS()
+        fps = self.proc_thread.fps
         fps.start()
         while not self.grab_thread.is_stopped():
             self.frame_lock.acquire()
