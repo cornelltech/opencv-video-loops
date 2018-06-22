@@ -78,15 +78,13 @@ class VideoStreamABC():
         """Main loop of thread that processes & displays grabbed video frames"""
         fps = FPS()
         fps.start()
-        while not self.grab_thread.is_stopped():
+        while True:
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
-            if frame is None:
+            if frame is None or cv2.waitKey(1) == 27:
                 break
             cv2.imshow(WINDOW_NAME, self.process_frame(frame))
-            if cv2.waitKey(1) == 27:
-                break
             if self.pacer:
                 self.pacer.update()
             fps.update()
