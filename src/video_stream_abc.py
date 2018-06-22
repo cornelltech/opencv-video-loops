@@ -40,7 +40,7 @@ class VideoStreamABC():
     """Abstract base class for multithreaded OpenCV video streaming"""
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, stream, full_screen=False, grab_fps=11, proc_fps=22):
+    def __init__(self, stream, full_screen=False, grab_fps=30, proc_fps=30):
         self.stream = stream
         self.frame_lock = Lock()
         self.frame = None
