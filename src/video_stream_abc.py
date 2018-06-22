@@ -58,14 +58,14 @@ class VideoStreamABC():
         fps = FPS()
         fps.start()
         while not self.grab_thread.is_stopped():
-            (got_it, frame) = self.stream.read()
-            if not got_it:
-                print('Video stream stopped, ending video grabbing.')
+            (eof, frame) = self.stream.read()
+            if eof:
                 fps.stop()
                 print('[GRAB] elasped time: {:.2f}'.format(fps.elapsed()))
                 print('[GRAB] approx. FPS: {:.2f}'.format(fps.fps()))
                 print('[GRAB] n_frames: %i' % fps.n_frames)
                 self.grab_thread.stop()
+                fame = None
             self.frame_lock.acquire()
             self.frame = frame
             self.frame_lock.release()
@@ -77,24 +77,24 @@ class VideoStreamABC():
         """Main loop of thread that processes & displays grabbed video frames"""
         fps = FPS()
         fps.start()
-        while not self.grab_thread.is_stopped():
+        while True:
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
-            if frame is not None:
-                # we process the frame in the next line
-                cv2.imshow(WINDOW_NAME, self.process_frame(frame))
-                if cv2.waitKey(1) == 27:
-                    fps.stop()
-                    print('[PROC] elasped time: {:.2f}'.format(fps.elapsed()))
-                    print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
-                    print('[PROC] n_frames: %i' % fps.n_frames)
-                    self.grab_thread.stop()
-                    self.proc_thread.stop()
-                    cv2.destroyAllWindows()
-                if self.pacer:
-                    self.pacer.update()
-                fps.update()
+            if not frame or cv2.waitKey(1) == 27:
+                fps.stop()
+                print('[PROC] elasped time: {:.2f}'.format(fps.elapsed()))
+                print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
+                print('[PROC] n_frames: %i' % fps.n_frames)
+                # self.grab_thread.stop()
+                self.proc_thread.stop()
+                cv2.destroyAllWindows()
+
+            cv2.imshow(WINDOW_NAME, self.process_frame(frame))
+
+            if self.pacer:
+                self.pacer.update()
+            fps.update()
 
     @abc.abstractmethod
     def process_frame(self, frame):
@@ -117,5 +117,5 @@ if __name__ == '__main__':
     # you can supply whatever stream you want, e.g. the one returned
     # by cv2.VideoCapture(), as long as it has the read() function
     # implemented for getting the next frame and that this function
-    # returns two values, as in: (got_it, frame) = stream.read()
+    # returns two values, as in: (eof, frame) = stream.read()
     VisualizeOnly(cv2.VideoCapture(sys.argv[1])).start()
