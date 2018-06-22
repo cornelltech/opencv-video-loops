@@ -19,7 +19,6 @@ class StoppableThread(Thread):
         # self.stop_event: set it to stop the thread
         self._stop_event = Event()
         self.fps = FPS()
-
         if pace:
             self.pacer = Pacer(pace)
         else:
@@ -39,13 +38,13 @@ class VideoStreamABC():
     """Abstract base class for multithreaded OpenCV video streaming"""
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, stream, full_screen=False, grab_fps=None, proc_fps=None):
+    def __init__(self, stream, full_screen=False, grab_fps=30, proc_fps=30):
         self.stream = stream
         self.frame_lock = Lock()
         self.frame = None
         self.grab_thread = StoppableThread(grab_fps,
                                            target=self.grab_thread_loop)
-        self.proc_thread = StoppableThread(proc_fps, 
+        self.proc_thread = StoppableThread(proc_fps,
                                            target=self.proc_thread_loop)
 
         if full_screen:
@@ -75,6 +74,7 @@ class VideoStreamABC():
         self.grab_thread.stop()
         self.proc_thread.stop()
         cv2.destroyAllWindows()
+        sys.exit(0)
 
     def grab_thread_loop(self):
         """Main loop of thread that continuously grabs video frames"""
@@ -99,17 +99,22 @@ class VideoStreamABC():
         if self.proc_thread.pacer:
             self.proc_thread.pacer.start()
         self.proc_thread.fps.start()
-        while not self.grab_thread.is_stopped():
-            self.frame_lock.acquire()
-            frame = self.frame
-            self.frame_lock.release()
-            if frame is None or cv2.waitKey(1) == 27:
-                self.stop()
-            # here is where we process the frame
-            cv2.imshow(WINDOW_NAME, self.process_frame(frame))
+        last_frame = 0
+        while not self.proc_thread.is_stopped():
+            frame_num = self.grab_thread.fps.n_frames
+            if frame_num > last_frame:
+                # only process if grab has advanced at least one frame
+                self.frame_lock.acquire()
+                frame = self.frame
+                self.frame_lock.release()
+                if frame is None or cv2.waitKey(1) == 27:
+                    self.stop()
+                # here is where we process the frame
+                cv2.imshow(WINDOW_NAME, self.process_frame(frame))
+                last_frame = frame_num
+                self.proc_thread.fps.update()
             if self.proc_thread.pacer:
                 self.proc_thread.pacer.update()
-            self.proc_thread.fps.update()
 
     @abc.abstractmethod
     def process_frame(self, frame):
