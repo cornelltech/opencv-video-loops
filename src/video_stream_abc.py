@@ -60,41 +60,41 @@ class VideoStreamABC():
         while not self.grab_thread.is_stopped():
             (got_it, frame) = self.stream.read()
             if not got_it:
-                break
+                print('Video stream stopped, ending video grabbing.')
+                fps.stop()
+                print('[GRAB] elasped time: {:.2f}'.format(fps.elapsed()))
+                print('[GRAB] approx. FPS: {:.2f}'.format(fps.fps()))
+                print('[GRAB] n_frames: %i' % fps.n_frames)
+                self.grab_thread.stop()
             self.frame_lock.acquire()
             self.frame = frame
             self.frame_lock.release()
             if self.pacer:
                 self.pacer.update()
             fps.update()
-        fps.stop()
-        print('[GRAB] elasped time: {:.2f}'.format(fps.elapsed()))
-        print('[GRAB] approx. FPS: {:.2f}'.format(fps.fps()))
-        print('[GRAB] n_frames: %i' % fps.n_frames)
-        self.grab_thread.stop()
-        frame = None
 
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
         fps = FPS()
         fps.start()
-        while not self.proc_thread.is_stopped():
+        while not self.grab_thread.is_stopped():
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
-            if frame is None or cv2.waitKey(1) == 27:
-                break
-            cv2.imshow(WINDOW_NAME, self.process_frame(frame))
-            if self.pacer:
-                self.pacer.update()
-            fps.update()
-        fps.stop()
-        print('[PROC] elasped time: {:.2f}'.format(fps.elapsed()))
-        print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
-        print('[PROC] n_frames: %i' % fps.n_frames)
-        self.grab_thread.stop()
-        self.proc_thread.stop()
-        cv2.destroyAllWindows()
+            if frame is not None:
+                # we process the frame in the next line
+                cv2.imshow(WINDOW_NAME, self.process_frame(frame))
+                if cv2.waitKey(1) == 27:
+                    fps.stop()
+                    print('[PROC] elasped time: {:.2f}'.format(fps.elapsed()))
+                    print('[PROC] approx. FPS: {:.2f}'.format(fps.fps()))
+                    print('[PROC] n_frames: %i' % fps.n_frames)
+                    self.grab_thread.stop()
+                    self.proc_thread.stop()
+                    cv2.destroyAllWindows()
+                if self.pacer:
+                    self.pacer.update()
+                fps.update()
 
     @abc.abstractmethod
     def process_frame(self, frame):
