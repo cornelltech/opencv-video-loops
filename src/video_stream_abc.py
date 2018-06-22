@@ -106,7 +106,7 @@ class VideoStreamABC():
                     cv2.destroyAllWindows()
                 if self.proc_thread.pacer:
                     self.proc_thread.pacer.update()
-                fps.update()
+                self.proc_thread.fps.update()
 
     @abc.abstractmethod
     def process_frame(self, frame):
