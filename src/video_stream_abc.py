@@ -21,7 +21,6 @@ class StoppableThread(Thread):
         self.fps = FPS()
 
         if pace:
-            print('pace: ', pace)
             self.pacer = Pacer(pace)
         else:
             self.pacer = None
@@ -40,7 +39,7 @@ class VideoStreamABC():
     """Abstract base class for multithreaded OpenCV video streaming"""
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, stream, full_screen=False, grab_fps=30, proc_fps=30):
+    def __init__(self, stream, full_screen=False, grab_fps=None, proc_fps=None):
         self.stream = stream
         self.frame_lock = Lock()
         self.frame = None
@@ -59,22 +58,34 @@ class VideoStreamABC():
         self.grab_thread.start()
         self.proc_thread.start()
 
+    def stop(self):
+        """Stop both grab & proc threads, report stats"""
+        self.grab_thread.fps.stop()
+        self.proc_thread.fps.stop()
+        print('[GRAB] elasped time: {:.2f}'.format(
+            self.grab_thread.fps.elapsed()))
+        print('[GRAB] approx. FPS: {:.2f}'.format(
+            self.grab_thread.fps.fps()))
+        print('[GRAB] n_frames: %i' % self.grab_thread.fps.n_frames)
+        print('[PROC] elasped time: {:.2f}'.format(
+            self.proc_thread.fps.elapsed()))
+        print('[PROC] approx. FPS: {:.2f}'.format(
+            self.proc_thread.fps.fps()))
+        print('[PROC] n_frames: %i' % self.proc_thread.fps.n_frames)
+        self.grab_thread.stop()
+        self.proc_thread.stop()
+        cv2.destroyAllWindows()
+
     def grab_thread_loop(self):
         """Main loop of thread that continuously grabs video frames"""
-        # fps = FPS()
-        self.grab_thread.pacer.start()
+        if self.grab_thread.pacer:
+            self.grab_thread.pacer.start()
         self.grab_thread.fps.start()
         while not self.grab_thread.is_stopped():
             (got_it, frame) = self.stream.read()
             if not got_it:
                 print('Video stream stopped, ending video grabbing.')
-                self.grab_thread.fps.stop()
-                print('[GRAB] elasped time: {:.2f}'.format(
-                    self.grab_thread.fps.elapsed()))
-                print('[GRAB] approx. FPS: {:.2f}'.format(
-                    self.grab_thread.fps.fps()))
-                print('[GRAB] n_frames: %i' % self.grab_thread.fps.n_frames)
-                self.grab_thread.stop()
+                self.stop()
             self.frame_lock.acquire()
             self.frame = frame
             self.frame_lock.release()
@@ -85,28 +96,20 @@ class VideoStreamABC():
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
         # fps = FPS()
-        self.proc_thread.pacer.start()
+        if self.proc_thread.pacer:
+            self.proc_thread.pacer.start()
         self.proc_thread.fps.start()
         while not self.grab_thread.is_stopped():
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
-            if frame is not None:
-                # we process the frame in the next line
-                cv2.imshow(WINDOW_NAME, self.process_frame(frame))
-                if cv2.waitKey(1) == 27:
-                    self.proc_thread.fps.stop()
-                    print('[PROC] elasped time: {:.2f}'.format(
-                        self.proc_thread.fps.elapsed()))
-                    print('[PROC] approx. FPS: {:.2f}'.format(
-                        self.proc_thread.fps.fps()))
-                    print('[PROC] n_frames: %i' % self.proc_thread.fps.n_frames)
-                    self.grab_thread.stop()
-                    self.proc_thread.stop()
-                    cv2.destroyAllWindows()
-                if self.proc_thread.pacer:
-                    self.proc_thread.pacer.update()
-                self.proc_thread.fps.update()
+            if frame is None or cv2.waitKey(1) == 27:
+                self.stop()
+            # here is where we process the frame
+            cv2.imshow(WINDOW_NAME, self.process_frame(frame))
+            if self.proc_thread.pacer:
+                self.proc_thread.pacer.update()
+            self.proc_thread.fps.update()
 
     @abc.abstractmethod
     def process_frame(self, frame):
