@@ -78,7 +78,7 @@ class VideoStreamABC():
         """Main loop of thread that processes & displays grabbed video frames"""
         fps = FPS()
         fps.start()
-        while not self.proc_thread_is_stopped():
+        while not self.proc_thread.is_stopped():
             self.frame_lock.acquire()
             frame = self.frame
             self.frame_lock.release()
