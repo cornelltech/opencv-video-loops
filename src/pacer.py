@@ -11,11 +11,10 @@ class Pacer():
     """
     Class to enforce a specific FPS by sleeping, if necessary, between frames
     """
-    def __init__(self, desiredFPS):
-        """constructor"""
+    def __init__(self, desired_fps):
         self.start_time = None
         self.prev_update_time = None
-        self.desired_period = 1.0/desiredFPS
+        self.desired_period = 1.0/desired_fps
         self.update_error = 0
 
     def start(self):
