@@ -58,8 +58,8 @@ class VideoStreamABC():
         fps = FPS()
         fps.start()
         while not self.grab_thread.is_stopped():
-            (eof, frame) = self.stream.read()
-            if eof:
+            (got_it, frame) = self.stream.read()
+            if not got_it:
                 fps.stop()
                 print('[GRAB] elasped time: {:.2f}'.format(fps.elapsed()))
                 print('[GRAB] approx. FPS: {:.2f}'.format(fps.fps()))
@@ -117,5 +117,5 @@ if __name__ == '__main__':
     # you can supply whatever stream you want, e.g. the one returned
     # by cv2.VideoCapture(), as long as it has the read() function
     # implemented for getting the next frame and that this function
-    # returns two values, as in: (eof, frame) = stream.read()
+    # returns two values, as in: (got_it, frame) = stream.read()
     VisualizeOnly(cv2.VideoCapture(sys.argv[1])).start()
