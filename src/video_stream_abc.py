@@ -97,10 +97,10 @@ class VideoStreamABC():
         if self.proc_thread.pacer:
             self.proc_thread.pacer.start()
         self.proc_thread.fps.start()
-        last_frame = 0
+        prev_count = 0
         while not self.proc_thread.is_stopped():
-            frame_num = self.grab_thread.fps.n_frames
-            if frame_num > last_frame:
+            count = self.grab_thread.fps.n_frames
+            if count > prev_count:
                 # only process if grab has advanced at least one frame
                 self.frame_lock.acquire()
                 frame = self.frame
@@ -109,7 +109,7 @@ class VideoStreamABC():
                     self.stop()
                 # here is where we process the frame
                 cv2.imshow(WINDOW_NAME, self.process_frame(frame))
-                last_frame = frame_num
+                prev_count = count
                 self.proc_thread.fps.update()
             if self.proc_thread.pacer:
                 self.proc_thread.pacer.update()
