@@ -24,8 +24,6 @@ class StoppableThread(Thread):
         else:
             self.pacer = None
 
-        self.is_started = False
-
     def stop(self):
         """Stop thread gracefully"""
         self._stop_event.set()
