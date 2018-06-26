@@ -12,7 +12,7 @@ from pacer import Pacer
 WINDOW_NAME = 'cam'
 
 # the number of maximum successive dropped frames before we quit
-MAX_SUCCESSIVE_DROPPED_FRAMES = 100
+MAX_SUCCESSIVE_DROPPED = 100
 
 # msecs to wait upon dropped frame
 DROPPED_FRAME_WAIT_MSEC = 10
@@ -89,26 +89,25 @@ class VideoStreamABC():
         if self.grab_thread.pacer:
             self.grab_thread.pacer.start()
         self.grab_thread.fps.start()
-        n_dropped_frames = 0
+        n_dropped = 0
         while not self.grab_thread.is_stopped():
 
             (got_one, frame) = self.stream.read()
 
-            # trying to ignore 'got_one' - perhaps this solves our
-            # problems (which show up when got_one returns False a
-            # couple of minutes into the video streaming)
-            # if not got_one:
-            #     n_dropped_frames += 1
-            #     eprint('Dropped a frame %d times' % n_dropped_frames)
-            #     if (n_dropped_frames >= MAX_SUCCESSIVE_DROPPED_FRAMES):
-            #         eprint('Dropped a frame too many times, exiting...')
-            #         self.stop()
-            #     else:
-            #         # wait for 1 msec, handle any windowing events, continue
-            #         cv2.waitKey(DROP_FRAME_WAIT_MSEC)
-            #         continue
-            # else:
-            #     n_dropped_frames = 0
+            if not got_one:
+                n_dropped += 1
+                if (n_dropped >= MAX_SUCCESSIVE_DROPPED):
+                    eprint(' '.join(['Error: Video frame dropped {0} times in ',
+                                     'a row. This can happen, e.g. when ',
+                                     'streaming over the network and the ',
+                                     'network is down.']).format(n_dropped))
+                    self.stop()
+                else:
+                    # wait for 1 msec, handle any windowing events, continue
+                    cv2.waitKey(DROPPED_FRAME_WAIT_MSEC)
+                    continue
+            else:
+                n_dropped = 0
 
             self.frame_lock.acquire()
             self.frame = frame
@@ -131,9 +130,12 @@ class VideoStreamABC():
                 self.frame_lock.acquire()
                 frame = self.frame
                 self.frame_lock.release()
-                if frame is None or cv2.waitKey(1) == 27:
+                # if frame is None or cv2.waitKey(1) == 27:
+                if cv2.waitKey(1) == 27:
+                    # user has quit by hitting the escape key
                     self.stop()
                 # here is where we process the frame
+
                 cv2.imshow(WINDOW_NAME, self.process_frame(frame))
                 prev_count = count
                 self.proc_thread.fps.update()
