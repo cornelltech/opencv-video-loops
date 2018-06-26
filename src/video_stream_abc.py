@@ -10,6 +10,12 @@ from pacer import Pacer
 
 
 WINDOW_NAME = 'cam'
+# the number of maximum successive dropped frames before we quit
+MAX_SUCCESSIVE_DROPPED_FRAMES = 100
+
+def eprint(*args, **kwargs):
+    """Same as print but goes to stderr"""
+    print(*args, file=sys.stderr, **kwargs)
 
 class StoppableThread(Thread):
     """Thread class with a stop() method. The thread itself has to check
@@ -79,11 +85,24 @@ class VideoStreamABC():
         if self.grab_thread.pacer:
             self.grab_thread.pacer.start()
         self.grab_thread.fps.start()
+        n_dropped_frames = 0
         while not self.grab_thread.is_stopped():
-            (got_it, frame) = self.stream.read()
-            if not got_it:
-                print('Video stream stopped, ending video grabbing.')
-                self.stop()
+
+            (got_one, frame) = self.stream.read()
+
+            if not got_one:
+                n_dropped_frames += 1
+                eprint('Dropped a frame %d times' % n_dropped_frames)
+                if (n_dropped_frames >= MAX_SUCCESSIVE_DROPPED_FRAMES):
+                    eprint('Dropped a frame too many times, exiting...')
+                    self.stop()
+                else:
+                    # wait for 1 msec, handle any windowing events, continue
+                    cv2.waitKey(1)
+                    continue
+            else:
+                n_dropped_frames = 0
+
             self.frame_lock.acquire()
             self.frame = frame
             self.frame_lock.release()
@@ -135,5 +154,5 @@ if __name__ == '__main__':
     # you can supply whatever stream you want, e.g. the one returned
     # by cv2.VideoCapture(), as long as it has the read() function
     # implemented for getting the next frame and that this function
-    # returns two values, as in: (got_it, frame) = stream.read()
+    # returns two values, as in: (got_one, frame) = stream.read()
     VisualizeOnly(cv2.VideoCapture(sys.argv[1])).start()
