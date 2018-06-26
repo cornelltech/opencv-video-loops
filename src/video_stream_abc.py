@@ -10,8 +10,12 @@ from pacer import Pacer
 
 
 WINDOW_NAME = 'cam'
+
 # the number of maximum successive dropped frames before we quit
 MAX_SUCCESSIVE_DROPPED_FRAMES = 100
+
+# msecs to wait upon dropped frame
+DROPPED_FRAME_WAIT_MSEC = 10
 
 def eprint(*args, **kwargs):
     """Same as print but goes to stderr"""
@@ -90,18 +94,21 @@ class VideoStreamABC():
 
             (got_one, frame) = self.stream.read()
 
-            if not got_one:
-                n_dropped_frames += 1
-                eprint('Dropped a frame %d times' % n_dropped_frames)
-                if (n_dropped_frames >= MAX_SUCCESSIVE_DROPPED_FRAMES):
-                    eprint('Dropped a frame too many times, exiting...')
-                    self.stop()
-                else:
-                    # wait for 1 msec, handle any windowing events, continue
-                    cv2.waitKey(1)
-                    continue
-            else:
-                n_dropped_frames = 0
+            # trying to ignore 'got_one' - perhaps this solves our
+            # problems (which show up when got_one returns False a
+            # couple of minutes into the video streaming)
+            # if not got_one:
+            #     n_dropped_frames += 1
+            #     eprint('Dropped a frame %d times' % n_dropped_frames)
+            #     if (n_dropped_frames >= MAX_SUCCESSIVE_DROPPED_FRAMES):
+            #         eprint('Dropped a frame too many times, exiting...')
+            #         self.stop()
+            #     else:
+            #         # wait for 1 msec, handle any windowing events, continue
+            #         cv2.waitKey(DROP_FRAME_WAIT_MSEC)
+            #         continue
+            # else:
+            #     n_dropped_frames = 0
 
             self.frame_lock.acquire()
             self.frame = frame
