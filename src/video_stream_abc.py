@@ -24,7 +24,7 @@ def eprint(*args, **kwargs):
 class StoppableThread(Thread):
     """Thread class with a stop() method. The thread itself has to check
     regularly for the is_stopped() condition."""
-    def __init__(self, pace=None,  **kwargs):
+    def __init__(self, pace=None, **kwargs):
         super().__init__(**kwargs)
         # self.stop_event: set it to stop the thread
         self._stop_event = Event()
@@ -96,7 +96,7 @@ class VideoStreamABC():
 
             if not got_one:
                 n_dropped += 1
-                if (n_dropped >= MAX_SUCCESSIVE_DROPPED):
+                if n_dropped >= MAX_SUCCESSIVE_DROPPED:
                     eprint(' '.join(['Error: Video frame dropped {0} times in ',
                                      'a row. This can happen, e.g. when ',
                                      'streaming over the network and the ',
