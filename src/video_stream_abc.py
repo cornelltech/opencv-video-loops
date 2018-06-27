@@ -3,7 +3,8 @@
 
 import sys
 import abc
-from threading import Lock, Thread, Event
+# from threading import Lock, Thread, Event
+from threading import Thread, Event
 import cv2
 from fps import FPS
 from pacer import Pacer
@@ -12,10 +13,10 @@ from pacer import Pacer
 WINDOW_NAME = 'cam'
 
 # the number of maximum successive dropped frames before we quit
-MAX_SUCCESSIVE_DROPPED = 100
+MAX_SUCCESSIVE_DROPPED = 10000000000000
 
 # msecs to wait upon dropped frame
-DROPPED_FRAME_WAIT_MSEC = 10
+DROPPED_FRAME_WAIT_MSEC = 1
 
 def eprint(*args, **kwargs):
     """Same as print but goes to stderr"""
@@ -46,9 +47,14 @@ class VideoStreamABC():
     """Abstract base class for multithreaded OpenCV video streaming"""
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, stream, full_screen=False, grab_fps=30, proc_fps=30):
-        self.stream = stream
-        self.frame_lock = Lock()
+    def __init__(self, stream_source,
+                 full_screen=False, grab_fps=30, proc_fps=30):
+
+        self.stream_source = stream_source
+        if stream_source:
+            self.stream = cv2.VideoCapture(stream_source)
+
+        # self.frame_lock = Lock()
         self.frame = None
         self.grab_thread = StoppableThread(grab_fps,
                                            target=self.grab_thread_loop)
@@ -89,32 +95,22 @@ class VideoStreamABC():
         if self.grab_thread.pacer:
             self.grab_thread.pacer.start()
         self.grab_thread.fps.start()
-        n_dropped = 0
         while not self.grab_thread.is_stopped():
-
             (got_one, frame) = self.stream.read()
-
-            if not got_one:
-                n_dropped += 1
-                if n_dropped >= MAX_SUCCESSIVE_DROPPED:
-                    eprint(' '.join(['Error: Video frame dropped {0} times in ',
-                                     'a row. This can happen, e.g. when ',
-                                     'streaming over the network and the ',
-                                     'network is down.']).format(n_dropped))
-                    self.stop()
-                else:
-                    # wait for 1 msec, handle any windowing events, continue
-                    cv2.waitKey(DROPPED_FRAME_WAIT_MSEC)
-                    continue
+            if got_one:
+                # got a frame, reset the number of consecutively dropped frames
+                self.frame = frame
+                if self.grab_thread.pacer:
+                    # pace the grabbing
+                    self.grab_thread.pacer.update()
+                # update frames per second
+                self.grab_thread.fps.update()
             else:
-                n_dropped = 0
-
-            self.frame_lock.acquire()
-            self.frame = frame
-            self.frame_lock.release()
-            if self.grab_thread.pacer:
-                self.grab_thread.pacer.update()
-            self.grab_thread.fps.update()
+                # did not get a frame - some error occurred
+                # reinitialize the stream
+                print('OpenCV streaming failed, reinitializing stream...')
+                self.stream = cv2.VideoCapture(self.stream_source)
+                # cv2.waitKey(DROPPED_FRAME_WAIT_MSEC)
 
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
@@ -127,15 +123,12 @@ class VideoStreamABC():
             count = self.grab_thread.fps.n_frames
             if count > prev_count:
                 # only process if grab has advanced at least one frame
-                self.frame_lock.acquire()
                 frame = self.frame
-                self.frame_lock.release()
                 # if frame is None or cv2.waitKey(1) == 27:
                 if cv2.waitKey(1) == 27:
                     # user has quit by hitting the escape key
                     self.stop()
                 # here is where we process the frame
-
                 cv2.imshow(WINDOW_NAME, self.process_frame(frame))
                 prev_count = count
                 self.proc_thread.fps.update()
@@ -164,4 +157,4 @@ if __name__ == '__main__':
     # by cv2.VideoCapture(), as long as it has the read() function
     # implemented for getting the next frame and that this function
     # returns two values, as in: (got_one, frame) = stream.read()
-    VisualizeOnly(cv2.VideoCapture(sys.argv[1])).start()
+    VisualizeOnly(sys.argv[1]).start()
