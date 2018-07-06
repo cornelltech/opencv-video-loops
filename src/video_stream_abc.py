@@ -3,7 +3,6 @@
 
 import sys
 import abc
-# from threading import Lock, Thread, Event
 from threading import Thread, Event
 import cv2
 from fps import FPS
@@ -11,16 +10,6 @@ from pacer import Pacer
 
 
 WINDOW_NAME = 'cam'
-
-# the number of maximum successive dropped frames before we quit
-MAX_SUCCESSIVE_DROPPED = 10000000000000
-
-# msecs to wait upon dropped frame
-DROPPED_FRAME_WAIT_MSEC = 1
-
-def eprint(*args, **kwargs):
-    """Same as print but goes to stderr"""
-    print(*args, file=sys.stderr, **kwargs)
 
 class StoppableThread(Thread):
     """Thread class with a stop() method. The thread itself has to check
@@ -66,6 +55,14 @@ class VideoStreamABC():
             cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN,
                                   cv2.WINDOW_FULLSCREEN)
 
+    def grabbed_frame_num(self):
+        """Return index of most recently grabbed frame"""
+        return self.grab_thread.fps.n_frames
+
+    def processed_frame_num(self):
+        """Return index of most recently processed frame"""
+        return self.proc_thread.fps.n_frames
+
     def start(self):
         """Start capturing & processing frames"""
         self.grab_thread.start()
@@ -110,7 +107,6 @@ class VideoStreamABC():
                 # reinitialize the stream
                 print('OpenCV streaming failed, reinitializing stream...')
                 self.stream = cv2.VideoCapture(self.stream_source)
-                # cv2.waitKey(DROPPED_FRAME_WAIT_MSEC)
 
     def proc_thread_loop(self):
         """Main loop of thread that processes & displays grabbed video frames"""
@@ -139,6 +135,7 @@ class VideoStreamABC():
     def process_frame(self, frame):
         """Abstract method that must be implemented by inherited child class."""
         raise Exception('Abstract method process_frame() not implemented!')
+
 
 if __name__ == '__main__':
     # To create a class that does something with each video frame,
