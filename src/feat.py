@@ -20,4 +20,4 @@ class KNN(Gray):
 
 
 if __name__ == '__main__':
-    KNN(sys.argv[1]).start()
+    KNN(cv2.VideoCapture(sys.argv[1])).start()
