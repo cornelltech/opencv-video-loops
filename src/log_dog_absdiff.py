@@ -21,4 +21,4 @@ class LogDogAbsDiff(LogDog):
 
 
 if __name__ == '__main__':
-    LogDogAbsDiff(cv2.VideoCapture(sys.argv[1])).start()
+    LogDogAbsDiff(sys.argv[1]).start()
