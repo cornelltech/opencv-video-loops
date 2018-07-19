@@ -21,4 +21,4 @@ class LogDog(Log):
 
 
 if __name__ == '__main__':
-    LogDog(cv2.VideoCapture(sys.argv[1])).start()
+    LogDog(sys.argv[1]).start()
