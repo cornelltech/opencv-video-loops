@@ -20,4 +20,4 @@ class Gray(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    Gray(cv2.VideoCapture(sys.argv[1])).start()
+    Gray(sys.argv[1]).start()
