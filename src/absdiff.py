@@ -25,4 +25,4 @@ class AbsDiff(Gray):
 
 
 if __name__ == '__main__':
-    AbsDiff(cv2.VideoCapture(sys.argv[1])).start()
+    AbsDiff(sys.argv[1]).start()
