@@ -26,4 +26,4 @@ class LogDogColor(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    LogDogColor(cv2.VideoCapture(sys.argv[1])).start()
+    LogDogColor(sys.argv[1]).start()
