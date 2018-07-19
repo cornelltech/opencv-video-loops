@@ -20,4 +20,4 @@ class Mog2(Gray):
 
 
 if __name__ == '__main__':
-    Mog2(cv2.VideoCapture(sys.argv[1])).start()
+    Mog2(sys.argv[1]).start()
