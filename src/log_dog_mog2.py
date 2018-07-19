@@ -25,4 +25,4 @@ class LogDogMog2(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    LogDogMog2(cv2.VideoCapture(sys.argv[1])).start()
+    LogDogMog2(sys.argv[1]).start()
