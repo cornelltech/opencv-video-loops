@@ -3,20 +3,25 @@
 
 import sys
 import cv2
-from gray import Gray
+# from gray import Gray
+from log_dog import LogDog
 
-
-class Feat(Gray):
+class Feat(LogDog):
     """Feat: class for video streaming SIFT-like feature detection"""
 
     def __init__(self, stream, *args, **kwargs):
         super().__init__(stream, *args, **kwargs)
-        if 'method' in kwargs:
-            print('method: ', method)
+        self.orb = cv2.ORB_create(
+            nfeatures = 500,
+            nlevels = 8,
+            scaleFactor = 1.2
+        )
 
     def process_frame(self, frame):
-        """KNN background subtraction"""
-        return frame
+        """Feature detection per frame"""
+        (keypoints, descs) = self.orb.detectAndCompute(frame, None)
+        res = cv2.drawKeypoints(frame, keypoints, None)
+        return res
 
 
 if __name__ == '__main__':
