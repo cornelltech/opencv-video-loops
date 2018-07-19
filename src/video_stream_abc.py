@@ -103,8 +103,7 @@ class VideoStreamABC():
                 # update frames per second
                 self.grab_thread.fps.update()
             else:
-                # did not get a frame - some error occurred
-                # reinitialize the stream
+                # did not get a frame, some error occurred, reinitialize stream
                 print('OpenCV streaming failed, reinitializing stream...')
                 self.stream = cv2.VideoCapture(self.stream_source)
 
