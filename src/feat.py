@@ -20,4 +20,4 @@ class Feat(Gray):
 
 
 if __name__ == '__main__':
-    Feat(cv2.VideoCapture(sys.argv[1])).start()
+    Feat(sys.argv[1]).start()
