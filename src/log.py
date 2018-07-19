@@ -29,4 +29,4 @@ class Log(Gray):
 
 
 if __name__ == '__main__':
-    Log(cv2.VideoCapture(sys.argv[1])).start()
+    Log(sys.argv[1]).start()
