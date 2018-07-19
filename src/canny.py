@@ -11,7 +11,8 @@ class Canny(Gray):
 
     def process_frame(self, frame):
         """Cannyure detection per frame"""
-        return cv2.Canny(frame, 50, 150)
+        gray = super().process_frame(frame)
+        return cv2.Canny(gray, 50, 150)
 
 
 if __name__ == '__main__':

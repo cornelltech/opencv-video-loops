@@ -14,9 +14,10 @@ class Gray(VideoStreamABC):
 
     def process_frame(self, frame):
         """gray frame"""
-        if numpy.size(frame[0, 0]) == 3:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        return frame
+        if len(frame.shape) < 3:
+            return frame
+        else:
+            return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
 if __name__ == '__main__':
