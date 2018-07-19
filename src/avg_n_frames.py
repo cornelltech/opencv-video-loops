@@ -30,4 +30,4 @@ class AvgNFrames(VideoStreamABC):
 
 
 if __name__ == '__main__':
-    AvgNFrames(cv2.VideoCapture(sys.argv[1])).start()
+    AvgNFrames(sys.argv[1]).start()
