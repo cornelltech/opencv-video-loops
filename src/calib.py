@@ -7,7 +7,7 @@ import numpy as np
 from gray import Gray
 
 
-N_CORNERS = (7, 7)
+N_CORNERS = (9, 7)
 CRITERIA = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 CALIB_RESULTS_FILENAME = 'calib'
 OBJP = np.zeros((N_CORNERS[0] * N_CORNERS[1], 3), np.float32)
