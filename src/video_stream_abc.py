@@ -149,8 +149,7 @@ if __name__ == '__main__':
         def process_frame(self, frame):
             return frame
 
-    # you can supply whatever stream you want, e.g. the one returned
-    # by cv2.VideoCapture(), as long as it has the read() function
-    # implemented for getting the next frame and that this function
-    # returns two values, as in: (got_one, frame) = stream.read()
+    # Argument == anything that cv2.VideoCapture() takes as an argument, eg:
+    # - /dev/video0
+    # - http://128.84.84.157:8080/?action=stream
     VisualizeOnly(sys.argv[1]).start()
